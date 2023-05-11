@@ -4,46 +4,10 @@ from scipy.special import loggamma, gamma
 import numpy as np
 from jax import jit
 
-def clog(z):
-    """
-    Compute the complex logarithm of a complex number in JAX.
-
-    Args:
-    z (complex): A complex number.
-
-    Returns:
-    complex: The complex logarithm of z.
-    """
-    return jnp.log(jnp.abs(z)) + 1j*jnp.angle(z)
-
-
-g = 7
-lanczos_coeffs  = [
-        0.99999999999980993,
-        676.5203681218851,
-        -1259.1392167224028,
-        771.32342877765313,
-        -176.61502916214059,
-        12.507343278686905,
-        -0.13857109526572012,
-        9.9843695780195716e-6,
-        1.5056327351493116e-7
-    ]
-
-def cgamma(z):
-    z -= 1
-    x = lanczos_coeffs[0]
-    for i in range(1, g+2):
-        x += lanczos_coeffs[i]/(z+i)
-    t = z + g + 0.5
-    return jnp.sqrt(2*jnp.pi) * t**(z+0.5) * jnp.exp(-t) * x
-
-def cloggamma(z):
-    return clog(cgamma(z))
 
 class SphericalBesselTransform:
     
-    def __init__(self, qs, L=1, low_ring=True, fourier=False):
+    def __init__(self, qs, L=15, ncol=1, low_ring=True, fourier=False):
         '''
         Class to perform spherical bessel transforms via FFTLog for a given set of qs, ie.
         the untransformed coordinate, up to a given order L in bessel functions (j_l for l
@@ -65,6 +29,8 @@ class SphericalBesselTransform:
             self.sqrtpi = jnp.sqrt(jnp.pi)
         else:
             self.sqrtpi = jnp.sqrt(jnp.pi) / (2*jnp.pi**2)
+        
+        self.ncol = ncol
         
         self.q = qs
         self.L = L
@@ -107,13 +73,17 @@ class SphericalBesselTransform:
         self.q.
         '''
         q = self.qdict[nu]; y = self.ydict[nu]
-        f = jnp.concatenate( (self.pads, self.q**(3-q)*fq, self.pads) )
+        
+        f = jnp.zeros( (self.ncol, self.N) )
+        #f[:,self.Npad - self.Npad//2 : self.N - self.Npad//2] = fq * self.q**(3-q)
+        f = f.at[:, self.Npad - self.Npad//2 : self.N - self.Npad//2].set(fq * self.q**(3-q))
 
+        
         fks = jnp.fft.rfft(f)
-        gks = self.udict[nu] * fks
+        gks = self.udict[nu][None,:] * fks
         gs = jnp.fft.hfft(gks) / self.N
 
-        return y, y**(-q) * gs[self.pad_iis]
+        return y, y[None,:]**(-q) * gs[:,self.pad_iis]
     
     
     def UK(self, nu, z):
