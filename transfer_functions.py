@@ -42,8 +42,7 @@ class Zenbu:
 
         
         self.jn = jn
-        self.sph = SphericalBesselTransform(self.qint, L=self.jn, ncol=self.num_power_components)
-        
+        self.sph = SphericalBesselTransform(self.qint, L=self.jn, ncol=self.num_power_components)        
         
         if kvec is None:
             self.kmin, self.kmax = kmin, kmax
