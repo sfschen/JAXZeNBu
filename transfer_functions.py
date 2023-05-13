@@ -6,7 +6,7 @@ import os
 
 from scipy.interpolate import interp1d
 
-from Utils.spherical_bessel_transform_ncol import SphericalBesselTransform
+from Utils.spherical_bessel_transform_ncol_jax import SphericalBesselTransform
 from Utils.qfuncfft_jax import QFuncFFT_JAX as QFuncFFT
 from Utils.loginterp_jax import loginterp_jax as loginterp
 
