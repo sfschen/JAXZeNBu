@@ -123,7 +123,6 @@ class QFuncFFT_JAX:
 
     def setup_2pts(self):
         # Piece together xi_l_n into what we need
-        print(self.xi0m2[0])
         self.Xlin = 2./3 * (self.xi0m2[0] - self.xi0m2 - self.xi2m2)
         self.Ylin = 2 * self.xi2m2
         

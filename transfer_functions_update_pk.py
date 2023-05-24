@@ -50,7 +50,7 @@ class Zenbu:
         
         if kvec is None:
             self.kmin, self.kmax = kmin, kmax
-            self.nk = 100
+            self.nk = nk
     
             self.kv = jnp.logspace( jnp.log10(self.kmin),  jnp.log10(self.kmax), self.nk)
             #self.pktable =  jnp.zeros([self.nk, self.num_power_components+1])
