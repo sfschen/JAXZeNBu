@@ -1,6 +1,7 @@
 import jax.numpy as jnp
 from jax import jit
 from jax import lax
+from functools import partial
 
 import os
 
@@ -41,7 +42,7 @@ class Zenbu:
         
         self.update_power_spectrum(pint)
         
-        self.pktable = None
+        #self.pktable = None
         self.num_power_components = 4
 
         self.jn = jn
@@ -52,15 +53,15 @@ class Zenbu:
             self.nk = 100
     
             self.kv = jnp.logspace( jnp.log10(self.kmin),  jnp.log10(self.kmax), self.nk)
-            self.pktable =  jnp.zeros([self.nk, self.num_power_components+1])
-            self.pktable = self.pktable.at[:,0].set(self.kv)
+            #self.pktable =  jnp.zeros([self.nk, self.num_power_components+1])
+            #self.pktable = self.pktable.at[:,0].set(self.kv)
         else:
             self.kmin, self.kmax = kvec[0], kvec[-1]
             self.nk = len(kvec)
             
             self.kv = kvec
-            self.pktable =  jnp.zeros([self.nk, self.num_power_components+1])
-            self.pktable = self.pktable.at[:,0].set(self.kv)
+            #self.pktable =  jnp.zeros([self.nk, self.num_power_components+1])
+            #self.pktable = self.pktable.at[:,0].set(self.kv)
 
     def update_power_spectrum(self, p):
         # Updates the power spectrum and various q functions. Can continually compute for new cosmologies without reloading FFTW
@@ -139,7 +140,10 @@ class Zenbu:
 
         def _ptable_loopfunc(ii, tab):
             return tab.at[ii,1:].set(self.p_integrals(self.kv[ii]))
+   
+        pktable =  jnp.zeros([self.nk, self.num_power_components+1])
+        pktable = pktable.at[:,0].set(self.kv)
+
+        pktable = lax.fori_loop(0,self.nk,_ptable_loopfunc, pktable)
     
-        self.pktable = lax.fori_loop(0,self.nk,_ptable_loopfunc, self.pktable)
-    
-        return self.pktable
+        return pktable
