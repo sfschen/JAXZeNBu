@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 
 from Utils.spherical_bessel_transform_ncol_jax import SphericalBesselTransform as SphericalBesselTransform_ncol
 from Utils.spherical_bessel_transform import SphericalBesselTransform as SphericalBesselTransform
-from Utils.qfuncfft_update_pk import QFuncFFT_JAX as QFuncFFT
+from Utils.qfuncfft_update_pk_slim import QFuncFFT_JAX as QFuncFFT
 from Utils.loginterp_jax import loginterp_jax as loginterp
 
 class Zenbu:
@@ -81,14 +81,6 @@ class Zenbu:
         
         self.Ulin = self.qf.Ulin
         self.corlin = self.qf.corlin
-    
-        self.Xs2 = self.qf.Xs2
-        self.Ys2 = self.qf.Ys2; self.sigmas2 = (self.Xs2 + self.Ys2)[-1]
-        self.V = self.qf.V
-        self.zeta = self.qf.zeta
-        self.chi = self.qf.chi
-        self.Xs4 = self.qf.Xs4
-        self.Ys4 = self.qf.Ys4
         
         self.Psi2graddelta = self.qf.xi_l_n(0,0,3./7*(self.qf.R1+self.qf.R2))
         self.theta = self.qf.theta
